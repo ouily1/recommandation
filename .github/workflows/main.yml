@@ -23,23 +23,17 @@ jobs:
           run: |
             docker build . --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
             docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-    deploy:
-        needs: publish
-        name: deploy image
-        runs-on: ubuntu-latest
-
-        steps:
-        - name: install ssh keys
-          # check this thread to understand why its needed:
-          # <https://stackoverflow.com/a/70447517>
+    build:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Create SSH key
           run: |
-            install -m 600 -D /dev/null ~/.ssh/id_rsa
-            echo "${{ secrets.SSH_PRIVATE_KEY }}"
-            echo "${{ secrets.SSH_HOST }}"
-            echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-            ssh-keyscan -H "$HOST" > ~/.ssh/known_hosts
-        - name: connect and pull
-          run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker run -d --name test -p 5432:5432 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
-        - name: cleanup
-          run: rm -rf ~/.ssh
+            mkdir -p ~/.ssh/
+            echo "$SSH_PRIVATE_KEY" > ../private.key
+            sudo chmod 600 ../private.key
+            echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          shell: bash
+          env:
+            SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
+            SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
+            SSH_KEY_PATH: ${{ github.workspace }}/../private.key
