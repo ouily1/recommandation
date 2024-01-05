@@ -34,9 +34,17 @@ jobs:
           # check this thread to understand why its needed:
           # <https://stackoverflow.com/a/70447517>
           run: |
-            install -m 600 -D /dev/null ~/.ssh/id_rsa
-            echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-            ssh-keyscan -H 192.168.1.28 > ~/.ssh/known_hosts
+            which ssh-agent || (sudo apk update && sudo apk add openssh-client)
+            which rsync || (sudo apk update && sudo apk add rsync)
+            mkdir -p ~/.ssh
+            chmod 700 ~/.ssh
+            touch ~/.ssh/private.key
+            touch ~/.ssh/known_hosts
+            chmod 600 ~/.ssh/private.key
+            echo -e "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/private.key
+            # Append keyscan output into known hosts
+            ssh-keyscan ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+            chmod 644 ~/.ssh/known_hosts
         - name: connect and pull
           run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker run -d --name test -p 5432:5432 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
         - name: cleanup
