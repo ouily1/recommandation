@@ -1,0 +1,20 @@
+name: Build
+
+on:
+  push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Build and Push Docker Image
+        run: |
+          docker login --username ouily1 --password ${{ secrets.GH_PAT }} ghcr.io
+          docker build . -t ghcr.io/ouily1/postgres-ghcr:latest
+          docker push ghcr.io/ouily1/postgres-ghcr:latest
+
+    
