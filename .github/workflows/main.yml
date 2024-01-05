@@ -37,3 +37,11 @@ jobs:
             SSH_PRIVATE_KEY: ${{secrets.SSH_PRIVATE_KEY}}
             SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
             SSH_KEY_PATH: ${{ github.workspace }}/../private.key
+        - name: SSH into Server and Run Commands
+          run: |
+            ssh -i $SSH_KEY_PATH ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker run -d --name test -p 5460/5432 ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          env:
+            SSH_KEY_PATH: ${{ github.workspace }}/../private.key
+            SSH_USER: ${{ secrets.SSH_USER }}
+            SSH_HOST: ${{ secrets.SSH_HOST }}
+           
