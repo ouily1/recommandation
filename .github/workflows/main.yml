@@ -34,13 +34,11 @@ jobs:
           SSH_KEY_PATH: ${{ github.workspace }}/../private.key
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
-          REGISTRY: ghcr.io
-          IMAGE_NAME: test/postgres-ghcr:latest
         run: |
          mkdir -p ~/.ssh/
          echo "$SSH_PRIV_KEY" > $SSH_KEY_PATH
          sudo chmod 600 $SSH_KEY_PATH
          echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-         ssh -i $SSH_KEY_PATH root@192.168.1.28 "docker run -d --name test -p 5460:5432 $REGISTRY/$IMAGE_NAME"
+         ssh -i $SSH_KEY_PATH root@192.168.1.28 "docker run -d --name test -p 5460:5432 $IMAGE_NAME"
 
            
