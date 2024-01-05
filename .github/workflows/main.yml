@@ -13,7 +13,7 @@ jobs:
 
       - name: Build and Push Docker Image
         run: |
-          docker login docker login --username ouily1 --password ${{ secrets.GH_PAT }} ghcr.io
+          docker login --username ouily1 --password ${{ secrets.GH_PAT }} ghcr.io
           docker build . -t ghcr.io/ouily1/postgres-ghcr:latest
           docker push ghcr.io/ouily1/postgres-ghcr:latest
 
