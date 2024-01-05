@@ -24,6 +24,7 @@ jobs:
             docker build . --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
             docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
     build:
+      needs: publish
       runs-on: ubuntu-latest
       steps:
         - name: Create SSH key
