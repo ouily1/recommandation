@@ -23,22 +23,19 @@ jobs:
           run: |
             docker build . --tag ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
             docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-    build:
-      needs: publish
-      runs-on: ubuntu-latest
-      steps:
-      - name: SSH and Docker Run
-        env:
-          SSH_PRIV_KEY: ${{ secrets.SSH_PRIV_KEY }}
-          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
-          SSH_KEY_PATH: ${{ github.workspace }}/../private.key
-          SSH_USER: ${{ secrets.SSH_USER }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-        run: |
-         mkdir -p ~/.ssh/
-         echo "$SSH_PRIV_KEY" > $SSH_KEY_PATH
-         sudo chmod 600 $SSH_KEY_PATH
-         echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-         ssh -i $SSH_KEY_PATH root@192.168.1.28 "docker run -d --name test -p 5460:5432 $IMAGE_NAME"
 
-           
+    deploy:
+        needs: publish
+        name: deploy image
+        runs-on: ubuntu-latest
+
+        steps:
+        - name: install ssh keys
+          run: |
+            install -m 600 -D /dev/null ~/.ssh/id_rsa
+            echo "${{ secrets.SSH_PRIVATE_KEY }}"
+            echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+            ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+        - name: connect and pull
+          run: ssh root@192.168.1.28 "cd ${{ secrets.WORK_DIR }} && docker-compose up -d"
+
