@@ -41,4 +41,6 @@ jobs:
            chmod 600 ~/.ssh/id_rsa
        - name: connect and pull
          run: |
-           ssh -i $SSH_PRIVATE_KEY root@192.168.1.37
+           echo "$SSH_PRIVATE_KEY" > private_key.pem
+           chmod 600 private_key.pem
+           ssh -i private_key.pem root@192.168.1.37
